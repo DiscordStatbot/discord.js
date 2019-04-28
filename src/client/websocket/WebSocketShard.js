@@ -239,7 +239,7 @@ class WebSocketShard extends EventEmitter {
 
   /**
    * Called whenever a message is received.
-   * @param {Event} event Event received
+   * @param {MessageEvent} event Event received
    * @private
    */
   onMessage({ data }) {
@@ -266,11 +266,14 @@ class WebSocketShard extends EventEmitter {
 
   /**
    * Called whenever an error occurs with the WebSocket.
-   * @param {ErrorEvent} error The error that occurred
+   * @param {ErrorEvent|Object} event The error that occurred
    * @private
    */
-  onError({ error }) {
-    if (error && error.message === 'uWs client connection error') {
+  onError(event) {
+    const error = event && event.error ? event.error : event;
+    if (!error) return;
+
+    if (error.message === 'uWs client connection error') {
       this.debug('Received a uWs error. Closing the connection and reconnecting...');
       this.connection.close(4000);
       return;
@@ -296,6 +299,11 @@ class WebSocketShard extends EventEmitter {
    */
 
   /**
+   * @external MessageEvent
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent}
+   */
+
+  /**
    * Called whenever a connection to the gateway is closed.
    * @param {CloseEvent} event Close event that was received
    * @private
@@ -303,10 +311,14 @@ class WebSocketShard extends EventEmitter {
   onClose(event) {
     this.closeSequence = this.sequence;
     this.sequence = -1;
+
     this.debug(`WebSocket was closed.
       Event Code: ${event.code}
       Clean: ${event.wasClean}
       Reason: ${event.reason || 'No reason received'}`);
+
+    this.setHeartbeatTimer(-1);
+    this.setHelloTimeout(-1);
 
     this.status = Status.DISCONNECTED;
 
@@ -526,7 +538,7 @@ class WebSocketShard extends EventEmitter {
    * a full [Payload](https://discordapp.com/developers/docs/topics/gateway#commands-and-events-gateway-commands).
    * Do not use this method if you don't know what you're doing.</warn>
    * @param {Object} data The full packet to send
-   * @param {?boolean} [important=false] If this packet should be added first in queue
+   * @param {boolean} [important=false] If this packet should be added first in queue
    */
   send(data, important = false) {
     this.ratelimit.queue[important ? 'unshift' : 'push'](data);
@@ -574,14 +586,14 @@ class WebSocketShard extends EventEmitter {
 
   /**
    * Destroys this shard and closes its WebSocket connection.
-   * @param {?number} [closeCode=1000] The close code to use
+   * @param {number} [closeCode=1000] The close code to use
    * @private
    */
   destroy(closeCode = 1000) {
     this.setHeartbeatTimer(-1);
     this.setHelloTimeout(-1);
     // Close the WebSocket connection, if any
-    if (this.connection) {
+    if (this.connection && this.connection.readyState !== WebSocket.CLOSED) {
       this.connection.close(closeCode);
     } else {
       /**

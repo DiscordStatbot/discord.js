@@ -194,15 +194,6 @@ class WebSocketManager {
         if (!this.shardQueue.size) this.reconnecting = false;
       });
 
-      shard.on(ShardEvents.RESUMED, () => {
-        /**
-         * Emitted when a shard resumes successfully.
-         * @event Client#shardResumed
-         * @param {number} id The shard ID that resumed
-         */
-        this.client.emit(Events.SHARD_RESUMED, shard.id);
-      });
-
       shard.on(ShardEvents.CLOSE, event => {
         if (event.code === 1000 ? this.destroyed : UNRECOVERABLE_CLOSE_CODES.includes(event.code)) {
           /**
@@ -216,7 +207,7 @@ class WebSocketManager {
           return;
         }
 
-        if (event.code >= 1000 && event.code <= 2000) {
+        if (event.code === 1000 || event.code === 4006) {
           // Any event code in this range cannot be resumed.
           shard.sessionID = undefined;
         }
