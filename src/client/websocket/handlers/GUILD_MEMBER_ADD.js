@@ -8,12 +8,17 @@ module.exports = (client, { d: data }, shard) => {
     guild.memberCount++;
     const member = guild.members.add(data);
     if (shard.status === Status.READY) {
-    /**
-     * Emitted whenever a user joins a guild.
-     * @event Client#guildMemberAdd
-     * @param {GuildMember} member The member that has joined a guild
-     */
-      client.emit(Events.GUILD_MEMBER_ADD, member);
+      /**
+       * Emitted whenever a user joins a guild.
+       * @event Client#guildMemberAdd
+       * @param {GuildMember} member The member that has joined a guild
+       */
+      client.emit(
+        Events.GUILD_MEMBER_ADD,
+        member,
+        client.fetchGuildInvites(guild),
+        guild.invites ? guild.invites : null
+      );
     }
   }
 };
