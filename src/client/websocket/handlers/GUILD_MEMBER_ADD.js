@@ -15,9 +15,7 @@ module.exports = (client, { d: data }, shard) => {
        */
       client.emit(
         Events.GUILD_MEMBER_ADD,
-        member,
-        client.fetchGuildInvites(guild),
-        guild.invites ? guild.invites : null
+        member
       );
     }
   }
