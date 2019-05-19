@@ -157,7 +157,7 @@ class Shard extends EventEmitter {
   /**
    * Kills and restarts the shard's process/worker.
    * @param {number} [delay=500] How long to wait between killing the process/worker and restarting it (in milliseconds)
-   * @param {number} [spawnTimeout=30000] The amount in milliseconds to wait until the {@link Client} has become ready
+   * @param {number} [spawnTimeout=300000] The amount in milliseconds to wait until the {@link Client} has become ready
    * before resolving. (-1 or Infinity for no wait)
    * @returns {Promise<ChildProcess>}
    */
