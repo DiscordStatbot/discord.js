@@ -131,6 +131,8 @@ exports.Endpoints = {
         if (format === 'default') format = hash.startsWith('a_') ? 'gif' : 'webp';
         return makeImageUrl(`${root}/avatars/${userID}/${hash}`, { format, size });
       },
+      Banner: (guildID, hash, format = 'webp', size) =>
+        makeImageUrl(`${root}/banners/${guildID}/${hash}`, { format, size }),
       Icon: (guildID, hash, format = 'webp', size) =>
         makeImageUrl(`${root}/icons/${guildID}/${hash}`, { format, size }),
       AppIcon: (clientID, hash, { format = 'webp', size } = {}) =>
@@ -307,6 +309,7 @@ exports.PartialTypes = keyMirror([
  * * GUILD_ROLE_UPDATE
  * * GUILD_BAN_ADD
  * * GUILD_BAN_REMOVE
+ * * GUILD_EMOJIS_UPDATE
  * * CHANNEL_CREATE
  * * CHANNEL_DELETE
  * * CHANNEL_UPDATE
@@ -321,7 +324,6 @@ exports.PartialTypes = keyMirror([
  * * USER_UPDATE
  * * USER_SETTINGS_UPDATE
  * * PRESENCE_UPDATE
- * * VOICE_STATE_UPDATE
  * * TYPING_START
  * * VOICE_STATE_UPDATE
  * * VOICE_SERVER_UPDATE
@@ -358,7 +360,6 @@ exports.WSEvents = keyMirror([
   'MESSAGE_REACTION_REMOVE_ALL',
   'USER_UPDATE',
   'PRESENCE_UPDATE',
-  'VOICE_STATE_UPDATE',
   'TYPING_START',
   'VOICE_STATE_UPDATE',
   'VOICE_SERVER_UPDATE',
@@ -375,6 +376,10 @@ exports.WSEvents = keyMirror([
  * * CHANNEL_ICON_CHANGE
  * * PINS_ADD
  * * GUILD_MEMBER_JOIN
+ * * USER_PREMIUM_GUILD_SUBSCRIPTION
+ * * USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1
+ * * USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2
+ * * USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3
  * @typedef {string} MessageType
  */
 exports.MessageTypes = [
@@ -386,6 +391,10 @@ exports.MessageTypes = [
   'CHANNEL_ICON_CHANGE',
   'PINS_ADD',
   'GUILD_MEMBER_JOIN',
+  'USER_PREMIUM_GUILD_SUBSCRIPTION',
+  'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1',
+  'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2',
+  'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3',
 ];
 
 /**
@@ -409,6 +418,8 @@ exports.ChannelTypes = {
   VOICE: 2,
   GROUP: 3,
   CATEGORY: 4,
+  NEWS: 5,
+  STORE: 6,
 };
 
 exports.ClientApplicationAssetTypes = {
