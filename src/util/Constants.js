@@ -126,15 +126,17 @@ exports.Endpoints = {
     return {
       Emoji: (emojiID, format = 'png') => `${root}/emojis/${emojiID}.${format}`,
       Asset: name => `${root}/assets/${name}`,
-      DefaultAvatar: number => `${root}/embed/avatars/${number}.png`,
+      DefaultAvatar: discriminator => `${root}/embed/avatars/${discriminator}.png`,
       Avatar: (userID, hash, format = 'default', size) => {
         if (format === 'default') format = hash.startsWith('a_') ? 'gif' : 'webp';
         return makeImageUrl(`${root}/avatars/${userID}/${hash}`, { format, size });
       },
       Banner: (guildID, hash, format = 'webp', size) =>
         makeImageUrl(`${root}/banners/${guildID}/${hash}`, { format, size }),
-      Icon: (guildID, hash, format = 'webp', size) =>
-        makeImageUrl(`${root}/icons/${guildID}/${hash}`, { format, size }),
+      Icon: (guildID, hash, format = 'default', size) => {
+        if (format === 'default') format = hash.startsWith('a_') ? 'gif' : 'webp';
+        return makeImageUrl(`${root}/icons/${guildID}/${hash}`, { format, size });
+      },
       AppIcon: (clientID, hash, { format = 'webp', size } = {}) =>
         makeImageUrl(`${root}/app-icons/${clientID}/${hash}`, { size, format }),
       AppAsset: (clientID, hash, { format = 'webp', size } = {}) =>
@@ -143,6 +145,8 @@ exports.Endpoints = {
         makeImageUrl(`${root}/channel-icons/${channelID}/${hash}`, { size, format }),
       Splash: (guildID, hash, format = 'webp', size) =>
         makeImageUrl(`${root}/splashes/${guildID}/${hash}`, { size, format }),
+      TeamIcon: (teamID, hash, { format = 'webp', size } = {}) =>
+        makeImageUrl(`${root}/team-icons/${teamID}/${hash}`, { size, format }),
     };
   },
   invite: (root, code) => `${root}/${code}`,
@@ -565,6 +569,19 @@ exports.APIErrors = {
 exports.DefaultMessageNotifications = [
   'ALL',
   'MENTIONS',
+];
+
+/**
+ * The value set for a team members's membership state:
+ * * INVITED
+ * * ACCEPTED
+ * @typedef {string} MembershipStates
+ */
+exports.MembershipStates = [
+  // They start at 1
+  null,
+  'INVITED',
+  'ACCEPTED',
 ];
 
 function keyMirror(arr) {
