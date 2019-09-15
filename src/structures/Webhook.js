@@ -141,14 +141,18 @@ class Webhook {
     }
 
     const { data, files } = await apiMessage.resolveFiles();
-    return this.client.api.webhooks(this.id, this.token).post({
-      data, files,
-      query: { wait: true },
-      auth: false,
-    }).then(d => {
-      if (!this.client.channels) return d;
-      return this.client.channels.get(d.channel_id).messages.add(d, false);
-    });
+    return this.client.api
+      .webhooks(this.id, this.token)
+      .post({
+        data,
+        files,
+        query: { wait: true },
+        auth: false,
+      })
+      .then(d => {
+        if (!this.client.channels || !this.client.channels.has(d.channel_id)) return d;
+        return this.client.channels.get(d.channel_id).messages.add(d, false);
+      });
   }
 
   /**
@@ -169,14 +173,17 @@ class Webhook {
    * }).catch(console.error);
    */
   sendSlackMessage(body) {
-    return this.client.api.webhooks(this.id, this.token).slack.post({
-      query: { wait: true },
-      auth: false,
-      data: body,
-    }).then(data => {
-      if (!this.client.channels) return data;
-      return this.client.channels.get(data.channel_id).messages.add(data, false);
-    });
+    return this.client.api
+      .webhooks(this.id, this.token)
+      .slack.post({
+        query: { wait: true },
+        auth: false,
+        data: body,
+      })
+      .then(data => {
+        if (!this.client.channels) return data;
+        return this.client.channels.get(data.channel_id).messages.add(data, false);
+      });
   }
 
   /**
@@ -193,15 +200,18 @@ class Webhook {
       return DataResolver.resolveImage(avatar).then(image => this.edit({ name, avatar: image }, reason));
     }
     if (channel) channel = channel instanceof Channel ? channel.id : channel;
-    return this.client.api.webhooks(this.id, channel ? undefined : this.token).patch({
-      data: { name, avatar, channel_id: channel },
-      reason,
-    }).then(data => {
-      this.name = data.name;
-      this.avatar = data.avatar;
-      this.channelID = data.channel_id;
-      return this;
-    });
+    return this.client.api
+      .webhooks(this.id, channel ? undefined : this.token)
+      .patch({
+        data: { name, avatar, channel_id: channel },
+        reason,
+      })
+      .then(data => {
+        this.name = data.name;
+        this.avatar = data.avatar;
+        this.channelID = data.channel_id;
+        return this;
+      });
   }
 
   /**
@@ -223,14 +233,8 @@ class Webhook {
   }
 
   static applyToClass(structure) {
-    for (const prop of [
-      'send',
-      'sendSlackMessage',
-      'edit',
-      'delete',
-    ]) {
-      Object.defineProperty(structure.prototype, prop,
-        Object.getOwnPropertyDescriptor(Webhook.prototype, prop));
+    for (const prop of ['send', 'sendSlackMessage', 'edit', 'delete']) {
+      Object.defineProperty(structure.prototype, prop, Object.getOwnPropertyDescriptor(Webhook.prototype, prop));
     }
   }
 }
